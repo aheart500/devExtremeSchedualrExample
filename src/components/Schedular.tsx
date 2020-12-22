@@ -1,22 +1,17 @@
 import React, { useState, useRef } from "react";
 
-import Scheduler, {
-  AppointmentDragging,
-  Resource,
-} from "devextreme-react/scheduler";
+import Scheduler, { AppointmentDragging } from "devextreme-react/scheduler";
 import Draggable from "devextreme-react/draggable";
 import ScrollView from "devextreme-react/scroll-view";
 
-import { appointments, rooms as roomsData, tasks } from "./data";
+import { rooms as roomsData, tasks } from "./data";
 
-const currentDate = new Date(2021, 4, 24);
+const currentDate = new Date(2020, 11);
 const draggingGroupName = "appointmentsGroup";
 const Appointment = ({ appointmentData }: { appointmentData: any }) => {
   return (
     <>
-      <span>
-        {appointmentData.text} {appointmentData.data?.doc}{" "}
-      </span>
+      <span>{appointmentData.summary}</span>
     </>
   );
 };
@@ -24,13 +19,20 @@ const ToolTip = (props) => {
   console.log(props);
   return <h1>{props.appointmentData.text}</h1>;
 };
-const Schedular = () => {
+const Schedular = ({ source }: { source?: any }) => {
   const schedulerRef = useRef(null);
   const [rooms, setRooms] = useState(roomsData);
   const [state, setState] = useState({
     tasks,
-    appointments,
+    appointments: source.map((item) => {
+      return {
+        ...item,
+        startDate: item.start.dateTime,
+        endDate: item.end.dateTime,
+      };
+    }),
   });
+
   const getToday = () => {
     if (schedulerRef && schedulerRef.current) {
       (schedulerRef as any).current.instance.option("currentDate", new Date());
@@ -53,15 +55,11 @@ const Schedular = () => {
     }
   };
   const onAppointmentAdd = (e) => {
-    const index = state.tasks.indexOf(e.fromData);
-
-    if (index >= 0) {
-      state.tasks.splice(index, 1);
-      state.appointments.push(e.itemData);
-
+    const movedTask = state.tasks.find((task) => task === e.fromData);
+    if (movedTask) {
       setState({
-        tasks: [...state.tasks],
-        appointments: [...state.appointments],
+        tasks: [...state.tasks.filter((item) => item !== movedTask)],
+        appointments: [...state.appointments, e.itemData],
       });
     }
   };
@@ -79,7 +77,7 @@ const Schedular = () => {
       e.cancel = true;
     }
   };
-
+  console.log(state);
   return (
     <>
       <ScrollView id="scroll">
@@ -89,10 +87,10 @@ const Schedular = () => {
           group={draggingGroupName}
           onDragStart={onListDragStart}
         >
-          {state.tasks.map((task) => {
+          {state.tasks.map((task, i) => {
             return (
               <Draggable
-                key={task.text}
+                key={i}
                 className="item dx-card dx-theme-text-color dx-theme-background-color"
                 clone={true}
                 group={draggingGroupName}
@@ -108,7 +106,7 @@ const Schedular = () => {
       </ScrollView>
 
       <Scheduler
-        timeZone="America/Los_Angeles"
+        timeZone="Africa/Cairo"
         id="scheduler"
         ref={schedulerRef}
         onCellClick={(e) => {
@@ -120,7 +118,6 @@ const Schedular = () => {
         appointmentTooltipRender={(props) => <ToolTip {...props} />}
         dataSource={state.appointments}
         views={["day", "workWeek", "month"]}
-        groups={["room"]}
         defaultCurrentDate={currentDate}
         height={600}
         startDayHour={9}
@@ -131,12 +128,6 @@ const Schedular = () => {
           group={draggingGroupName}
           onRemove={onAppointmentRemove}
           onAdd={onAppointmentAdd}
-        />
-        <Resource
-          label="Room"
-          dataSource={rooms}
-          allowMultiple={false}
-          fieldExpr={"room"}
         />
       </Scheduler>
       <button onClick={getToday} style={{ position: "relative" }}>

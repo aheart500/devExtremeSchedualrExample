@@ -1,43 +1,31 @@
 export const tasks = [
   {
     text: "New Brochures",
-    data: { doc: "ff" },
   },
   {
     text: "Brochure Design Review",
-    data: { doc: "ff" },
   },
-  {
-    text: "Upgrade Personal Computers",
-    data: { doc: "ff" },
-  },
+  {},
   {
     text: "Install New Router in Dev Room",
-    data: { doc: "mm" },
   },
   {
     text: "Upgrade Server Hardware",
-    data: { doc: "mm" },
   },
   {
     text: "Install New Database",
-    data: { doc: "mm" },
   },
   {
     text: "Website Re-Design Plan",
-    data: { doc: "mm" },
   },
   {
     text: "Create Icons for Website",
-    data: { doc: "ff" },
   },
   {
     text: "Submit New Website Design",
-    data: { doc: "ff" },
   },
   {
     text: "Launch New Website",
-    data: { doc: "ff" },
   },
 ];
 
